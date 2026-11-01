@@ -52,10 +52,13 @@ inline constexpr std::string_view kFullscreenToggleBlocked = "Fullscreen must be
 inline constexpr std::string_view kModName = "Grimdark";
 inline constexpr std::string_view kModLoaded = "Grimdark loaded";
 // The update check (src/update_check.cpp): "Grimdark update available v0.5.0, you have v0.4.0, run the Grimdark installer to update"
-inline constexpr std::string_view kUpdateAvailable = "Grimdark update available";
-inline constexpr std::string_view kCiUpdateAvailable = "newer Grimdark CI build available";
+// (the name is the build's GRIMDARK_APP_NAME, so a fork speaks its own).
+inline constexpr std::string_view kUpdateAvailable = "update available";
+inline constexpr std::string_view kNewer = "newer";
+inline constexpr std::string_view kCiBuildAvailable = "CI build available";
 inline constexpr std::string_view kYouHave = "you have";
-inline constexpr std::string_view kRunInstallerToUpdate = "run the Grimdark installer to update";
+inline constexpr std::string_view kRunThe = "run the";
+inline constexpr std::string_view kInstallerToUpdate = "installer to update";
 inline constexpr std::string_view kCheckForUpdates = "check for updates";
 inline constexpr std::string_view kModLoadedNoSpeech = "Grimdark loaded, no speech backend";
 
@@ -518,5 +521,24 @@ gd::core::MessageBuilder& push_shortfall(gd::core::MessageBuilder& m, std::strin
 gd::core::MessageBuilder& push_faction(gd::core::MessageBuilder& m, std::string_view name, std::string_view level_name, float value, int low, int high);
 
 inline constexpr std::string_view kUnsupportedGameVersion = "this game version is not supported by Grimdark; menus will not be read";
+
+// ---- the controller (src/gamepad.cpp) ----
+inline constexpr std::string_view kPadConnected = "controller connected";
+inline constexpr std::string_view kPadDisconnected = "controller disconnected";
+inline constexpr std::string_view kPadXbox = "Xbox";
+inline constexpr std::string_view kPadPlayStation = "PlayStation";
+inline constexpr std::string_view kPadQuickMenu = "quick menu";
+inline constexpr std::string_view kPadActions = "actions";
+inline constexpr std::string_view kPadFreeCursor = "cursor";     // L3 + R3: the right stick moves the cursor
+inline constexpr std::string_view kPadScanner = "scanner";       // ... and back to the scanner
+// the right-stick scanner's categories, in flick order (each a review group of the keyboard's finding keys)
+inline constexpr std::string_view kScanEnemies = "enemies";
+inline constexpr std::string_view kScanStrongest = "strongest enemies";
+inline constexpr std::string_view kScanPeople = "people and objects";
+inline constexpr std::string_view kScanLoot = "loot";
+inline constexpr std::string_view kScanExits = "exits";
+inline constexpr std::string_view kScanBystanders = "bystanders and breakables";
+inline constexpr std::string_view kScanPets = "pets";
+inline constexpr std::string_view kScanCharacters = "characters";
 
 }  // namespace gd::strings

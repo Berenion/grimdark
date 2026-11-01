@@ -11,9 +11,10 @@ TEST_CASE("update: channel of the embedded version") {
   CHECK(channel_of("ci-") == Channel::None);
   CHECK(channel_of("ci-xyz") == Channel::None);
   CHECK(channel_of("0.4.0") == Channel::None);
-  CHECK(request_path(Channel::Release) == "/repos/ahicks92/grimdark/releases/latest");
-  CHECK(request_path(Channel::Ci) == "/repos/ahicks92/grimdark/releases/tags/ci-latest");
-  CHECK(request_path(Channel::None).empty());
+  CHECK(channel_of("v0.6.0-pad.1") == Channel::Release);
+  CHECK(request_path(Channel::Release, "ahicks92/grimdark") == "/repos/ahicks92/grimdark/releases/latest");
+  CHECK(request_path(Channel::Ci, "Berenion/grimdark") == "/repos/Berenion/grimdark/releases/tags/ci-latest");
+  CHECK(request_path(Channel::None, "ahicks92/grimdark").empty());
 }
 
 TEST_CASE("update: json string fields") {
@@ -33,6 +34,20 @@ TEST_CASE("update: releases compare by semver") {
   CHECK_FALSE(decide("v0.5.0", R"({"tag_name":"v0.5.0"})").newer);
   CHECK_FALSE(decide("v0.6.0", R"({"tag_name":"v0.5.0"})").newer);
   CHECK_FALSE(decide("v0.4.0", R"({"message":"Not Found"})").newer);
+}
+
+TEST_CASE("update: fork tags compare by pre-release precedence") {
+  CHECK(decide("v0.6.0-pad.1", R"({"tag_name":"v0.6.0-pad.2"})").newer);
+  CHECK(decide("v0.6.0-pad.2", R"({"tag_name":"v0.6.0-pad.10"})").newer);   // numeric, not text
+  CHECK(decide("v0.6.0-pad.9", R"({"tag_name":"v0.7.0-pad.1"})").newer);
+  CHECK(decide("v0.6.0-pad", R"({"tag_name":"v0.6.0-pad.1"})").newer);       // a longer list wins a tie
+  CHECK(decide("v0.6.0-pad.1", R"({"tag_name":"v0.6.0"})").newer);           // a plain release outranks its pre-release
+  CHECK(decide("v0.6.0-1", R"({"tag_name":"v0.6.0-pad"})").newer);           // a number sorts below a word
+  CHECK_FALSE(decide("v0.6.0-pad.2", R"({"tag_name":"v0.6.0-pad.2"})").newer);
+  CHECK_FALSE(decide("v0.6.0-pad.2", R"({"tag_name":"v0.6.0-pad.1"})").newer);
+  CHECK_FALSE(decide("v0.6.0-pad.1+b7", R"({"tag_name":"v0.6.0-pad.1+b8"})").newer);   // build metadata is ignored
+  CHECK_FALSE(decide("v0.7.0-pad.1", R"({"tag_name":"v0.6.0-pad.9"})").newer);
+  CHECK_FALSE(decide("v0.6.0", R"({"tag_name":"v0.6.0-pad.3"})").newer);
 }
 
 TEST_CASE("update: CI builds compare by commit") {

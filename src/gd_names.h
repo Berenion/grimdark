@@ -1846,4 +1846,13 @@ inline constexpr const char* ProjectileBase_GetLaunchAngle = "?GetLaunchAngle@Pr
 // public: static class GAME::RTTI_ClassInfo const & __ptr64 __cdecl GAME::ProjectileAreaEffect::GetStaticClassInfo(void)
 inline constexpr const char* ProjectileAreaEffect_GetStaticClassInfo_DLL = "Game.dll";
 inline constexpr const char* ProjectileAreaEffect_GetStaticClassInfo = "?GetStaticClassInfo@ProjectileAreaEffect@GAME@@SAAEBVRTTI_ClassInfo@2@XZ";
+// public: void __cdecl GAME::SteamControllerDevice::Update(int) __ptr64
+inline constexpr const char* SteamControllerDevice_Update_DLL = "Engine.dll";
+inline constexpr const char* SteamControllerDevice_Update = "?Update@SteamControllerDevice@GAME@@QEAAXH@Z";
+// public: bool __cdecl GAME::Steamworks::ControllerIsConnected(void)const __ptr64
+inline constexpr const char* Steamworks_ControllerIsConnected_DLL = "Engine.dll";
+inline constexpr const char* Steamworks_ControllerIsConnected = "?ControllerIsConnected@Steamworks@GAME@@QEBA_NXZ";
+// public: void __cdecl GAME::GameEngine::SetInputMode(enum GAME::InputMode) __ptr64
+inline constexpr const char* GameEngine_SetInputMode_DLL = "Game.dll";
+inline constexpr const char* GameEngine_SetInputMode = "?SetInputMode@GameEngine@GAME@@QEAAXW4InputMode@2@@Z";
 }  // namespace gd::names

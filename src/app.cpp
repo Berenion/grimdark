@@ -45,6 +45,7 @@
 #include "screens/sound_glossary.h"
 #include "screens/pets.h"
 #include "gameapi.h"
+#include "gamepad.h"
 #include "speech.h"
 #include "update_check.h"
 #include "world.h"
@@ -364,6 +365,7 @@ void tick() {
     log::writef("keyboard: {} ({})", owns ? "mod" : "game", s ? s->key() : "no screen");
   }
   g_input.set_live_categories(g_screens.live_categories());
+  gamepad::tick();   // the controller types into next frame's key queue, with the context just decided
   Screen* cur = g_screens.current();
   update::tick(cur ? cur->key() : std::string_view{}, t);
   if (raw || (cur && cur->captures_raw_input())) return;

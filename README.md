@@ -1,6 +1,11 @@
-# Grimdark
+# Grimdark Controller
 
 A screen-reader accessibility mod for Grim Dawn.
+
+This is a fork of [Grimdark](https://github.com/ahicks92/grimdark) that adds Xbox and PlayStation controller support
+(see Controller below). Everything else is the original mod, merged in as it is updated; the text below is the original
+author's. It installs as "Grimdark Controller", next to the original if you have that too, and both share the same
+settings.
 
 See [CHANGES.md](CHANGES.md) for what's new in each release.
 
@@ -45,12 +50,13 @@ APIs in very odd ways, the net effect of which is to break the JAWS / NVDA key. 
 injected at launch by our launcher.  If you make this mistake, close the game, restart your screen reader, and go
 through the launcher.
 
-Download `GrimdarkInstaller.exe` from the newest release on GitHub and run it. Install lists the released versions
+Download `GrimdarkControllerInstaller.exe` from the newest release on
+[this fork's releases page](https://github.com/Berenion/grimdark/releases) and run it. Install lists the released versions
 newest first and, last, "latest successful CI build", which is the untested build of the current source and is there for
 people who know they want it.  You get updates by running this same installer again.  The mod does not currently check
 for updates itself.
 
-You now have a desktop icon `Grimdark`.  You launch the game through this icon instead of the game's own.  Steam must be
+You now have a desktop icon `Grimdark Controller`.  You launch the game through this icon instead of the game's own.  Steam must be
 running.
 
 The launcher also sets the two game options the mod cannot play without, every time it starts the game: Movement Type is
@@ -60,7 +66,7 @@ bound, which the game itself leaves empty until you press Default on its Keybind
 game's default bindings, so do not rebind keys.
 
 You will also need to add an exception in Defender or your antivirus of choice for the folder
-`C:\Users\myusername\AppData\Local\Programs\Grimdark\`. Not the executable, which is replaced by updates.  You can get
+`C:\Users\myusername\AppData\Local\Programs\Grimdark Controller\`. Not the executable, which is replaced by updates.  You can get
 the path by right clicking the desktop icon and going to properties.  To do this for Defender, go to Windows Security ->
 Virus and Threat Protection, tab over to "manage settings", hit that, then tab over to "add or remove exclusions".
 
@@ -332,6 +338,81 @@ easy to miss because plain `P` does nothing with the mod running. While paused:
   rest), `;` and `/`, `X` for the room, and reading things. So you can pause in a fight, find out what is around you and
   where, and then unpause.
 
+### Controller
+
+An Xbox controller (or anything Windows sees as one) and the PlayStation DualShock 4 and DualSense, over USB or
+Bluetooth, work alongside the keyboard. The mod reads the controller itself and the game never sees it, so the game stays
+in its keyboard mode. "Controller connected, Xbox" or "... PlayStation" is said when one appears. The controller only
+works while the game window has the focus.
+
+For a PlayStation controller, turn Steam Input off for Grim Dawn (in Steam: Grim Dawn, Properties, Controller, "Disable
+Steam Input"). With it on, Steam hides the controller from the game, and the mod lives inside the game, so it never hears
+the controller connect.
+
+Buttons are written Xbox / PlayStation. Every controller command is one of the keyboard commands above; the key is
+given in brackets.
+
+In the world:
+
+| Button | Description |
+|---|---|
+| Left stick | Move (W A S D, eight directions) |
+| B / Circle | Evade (Space). B evades in every layer below too |
+| A / Cross | Left mouse button at the reviewed thing; hold to keep attacking (J) |
+| X / Square | Right mouse button at the reviewed thing (I) |
+| Y / Triangle | Jump to the nearest enemy (Alt+.) |
+| LB / L1, RB / R1 | Health potion (R), energy potion (E) |
+| LT / L2 (hold) | Hold Position: attack or cast without moving (Shift) |
+| RT / R2 (hold) | Quickbar layer, below |
+| Right stick flick | The scanner, below |
+| R3 | Ping the reviewed thing (;) |
+| L3 tap | Where am I (K) |
+| L3 hold | Mod layer, below |
+| D-pad up / down / left / right | Health and energy (H) / use the nearest usable thing (U) / pick up the nearest item (G) / walk to the last selection (L) |
+| Start / Options | Tap: game menu (Escape). Hold half a second: pause or unpause (Ctrl+P) |
+| View / Create, or the touchpad click | Quick menu: a list of the windows and settings (inventory, skills, map, codex, factions, riftgate, loot filter, pets, hotbar manager, combat announcements, sonar settings, cursor mode, pause, the Grimdark menu); Enter (A) opens one |
+
+The scanner: flick the right stick up or down to change category, which says the category and lands on its nearest
+entry ("loot, Rare Belt, 6 away, 2 o'clock"); flick left or right for the previous or next entry, nearest first. The
+categories, in order: enemies, strongest enemies, people and objects, loot, exits, bystanders and breakables, pets,
+characters. They are the review groups of `.` `,` N M V B ] C, so a landing moves the review cursor exactly as those keys
+do.
+
+Quickbar layer, hold RT / R2: A, X, Y = slots 1, 2, 3; LB, RB = slots 4, 5; d-pad up, right, down, left = slots 6, 7, 8, 9;
+R3 = slot 10. Hold LT as well to cast without moving.
+
+Mod layer, hold L3 (the d-pad is under the same thumb, so it has no L3 commands):
+
+| L3 + | Description |
+|---|---|
+| A / Cross | Follow the picked map marker (') |
+| X / Square | Follow the reviewed thing (Ctrl+') |
+| Y / Triangle | Inspect the target (/) |
+| LB / RB | Swap weapon set (F) / switch quickbar (Y) |
+| LT / RT | Sonar on or off (\) / show all items on or off (O) |
+| Right stick flick up / down / left | Objectives (Q) / describe the room (X) / nearest unexplored area (P) |
+| R3 | The right stick moves the cursor instead of scanning ("cursor"); again to go back ("scanner"). Grid or polar is the quick menu's cursor mode (Z) |
+| Start / Options | Grimdark menu (F1) |
+
+In menus and windows:
+
+| Button | Description |
+|---|---|
+| D-pad or left stick | Up / Down / Left / Right (held repeats) |
+| A / Cross | Activate (Enter) |
+| B / Circle | Back (Escape); Start / Options too |
+| X / Square | Secondary action (Backspace) |
+| Y / Triangle | Tooltip (Space); L3 + Y the detailed one (Ctrl+Space) |
+| Right stick up / down | The detailed tooltip a line at a time (Shift+Up / Shift+Down) |
+| R3 | Compare with what you have equipped (\) |
+| LB / RB | Previous / next panel (Shift+Tab / Tab) |
+| LT / RT | Previous / next tab (Ctrl+Shift+Tab / Ctrl+Tab) |
+| L3 + LB / RB | Previous / next group (Ctrl+Up / Ctrl+Down) |
+| L3 + LT / RT | First / last item (Home / End) |
+| L3 + A | Actions for the focused thing: assign to the left or right mouse or a quickbar slot, sell part of a stack or set the receiving bag, drop |
+
+Typing (a character's name, type-to-search in menus) still needs the keyboard.
+
 # Development
 
 For development the game runs **visible but never focused, with game audio and speech muted**, and it is driven over a
@@ -368,6 +449,9 @@ api.github.com for the update check, dev only: `nonexistent.invalid` tests the o
   game's ABI is MSVC, so no other compiler will do). CMake and Ninja are installed by that workload; `tools/vsdev.cmd`
   finds any VS 2022 edition (Community, Professional, Enterprise, Build Tools) through vswhere. A bare Build Tools
   install ships no Ninja of its own, so put one on PATH in that case.
+- With a Windows SDK older than 10.0.22000 (Build Tools' default is 10.0.20348) the SDK's C++/WinRT headers predate
+  C++20 coroutines and do not compile; the first configure then downloads the pinned C++/WinRT NuGet package (hash
+  checked) and generates newer headers into `build\ninja\cppwinrt\` (~55 MB). A newer SDK needs nothing extra.
 - The build links the C runtime statically, so a player needs no Visual C++ redistributable; only `prism.dll` has to sit
   next to `grimdark.dll`.
 - No other downloads: the prism speech SDK (the x64 headers, import library and `prism.dll` of release v0.18.1),

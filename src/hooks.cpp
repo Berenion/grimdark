@@ -512,6 +512,7 @@ static BOOL CALLBACK find_game_window(HWND h, LPARAM) {
   return TRUE;
 }
 HWND game_window() { if (!g_game_hwnd || !IsWindow(g_game_hwnd)) { g_game_hwnd = nullptr; EnumWindows(find_game_window, 0); } return g_game_hwnd; }
+bool game_has_focus() { HWND w = game_window(); return w && GetForegroundWindow() == w; }
 // The override is given in client coordinates; the game mostly asks for the screen variant (b=false).
 static Vec2* GetCursorPosition_hook(void* self, Vec2* out, bool b) {
   ++(b ? g_c_cursor_client : g_c_cursor_screen);

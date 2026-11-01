@@ -2,7 +2,7 @@
 //! rolling `ci-latest` pre-release that CI republishes on every push to main (offered last, on purpose).
 use serde::Deserialize;
 
-use super::paths::{CI_TAG, GITHUB_RELEASES_URL};
+use super::paths::{github_releases_url, CI_TAG};
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct ReleaseInfo {
@@ -88,7 +88,7 @@ pub fn fetch_catalog() -> Result<Catalog, String> {
         .timeout(std::time::Duration::from_secs(15))
         .build()
         .map_err(|e| format!("Failed to create the HTTP client: {}", e))?;
-    let resp = client.get(GITHUB_RELEASES_URL).send().map_err(|e| format!("Failed to reach GitHub: {}", e))?;
+    let resp = client.get(github_releases_url()).send().map_err(|e| format!("Failed to reach GitHub: {}", e))?;
     if !resp.status().is_success() {
         return Err(format!("GitHub returned status {}", resp.status()));
     }

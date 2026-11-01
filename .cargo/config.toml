@@ -1,0 +1,8 @@
+# This fork's identity (Berenion/grimdark, the controller build). Read at compile time by installer/src/core/paths.rs;
+# at the repo root so cargo finds it from here and from installer/ (it searches from the CWD, not the manifest). The
+# upstream repo has no such file and builds as plain "Grimdark". CI's workflow env sets the same values (an [env]
+# entry does not override a variable that is already set).
+[env]
+GRIMDARK_REPO = "Berenion/grimdark"
+GRIMDARK_APP_NAME = "Grimdark Controller"
+GRIMDARK_INSTALLER_EXE = "GrimdarkControllerInstaller.exe"

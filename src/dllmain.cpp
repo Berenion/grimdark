@@ -23,6 +23,7 @@
 #include "devserver.h"
 #include "hooks.h"
 #include "crash.h"
+#include "gamepad.h"
 #include "log.h"
 #include "speech.h"
 #include "update_check.h"
@@ -63,6 +64,7 @@ static DWORD WINAPI init_thread(LPVOID) {
   g_installed = true;
   gd::hooks::install();
   gd::world::install();
+  gd::gamepad::install();   // the game never sees a pad (src/gamepad.cpp)
   gd::combat::install();
   if (!env_flag(L"GRIMDARK_NOCASTS")) gd::casts::install();
   gd::telegraph::init();   // dev: skip the cast instrumentation
@@ -73,6 +75,7 @@ static DWORD WINAPI init_thread(LPVOID) {
   gd::audio::init();
   gd::voice::init();  // the positional voices (OneCore worker); falls back to the screen reader if it fails
   gd::app::init();
+  gd::gamepad::init();
   gd::rooms::init();  // assets/rooms.db (missing = the rooms feature stays silent)
   // The dev server is a player setting (F1 -> mod options, off by default); the dev loop sets GRIMDARK_PORT and
   // gets it regardless, so a hot reload into a dev-launched game keeps its server.
@@ -95,6 +98,7 @@ extern "C" __declspec(dllexport) DWORD WINAPI grimdark_unload(LPVOID) {
   if (!g_installed) { gd::crash::remove(); gd::speech::shutdown(); return 1; }   // the gate refused: only these two are up
   gd::dev::stop();
   gd::update::shutdown();
+  gd::gamepad::shutdown();
   gd::app::shutdown();
   gd::rooms::shutdown();
   gd::db::shutdown();
@@ -106,6 +110,7 @@ extern "C" __declspec(dllexport) DWORD WINAPI grimdark_unload(LPVOID) {
   gd::voice::shutdown();  // joins the worker before the mixer it feeds goes away
   gd::audio::shutdown();
   gd::world::remove();
+  gd::gamepad::remove();
   gd::hooks::remove();
   gd::crash::remove();
   gd::speech::shutdown();

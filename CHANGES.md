@@ -1,3 +1,11 @@
+# Unreleased
+
+- New: controller support. An Xbox controller, a DualShock 4 or a DualSense, wired or Bluetooth, works alongside the keyboard; the game itself never sees the controller, so nothing changes in how it plays. The left stick walks, B or Circle evades, A and X attack and cast at what you are reviewing, Y jumps to the nearest enemy, flicking the right stick runs a scanner through enemies, loot, exits, people and more, and View or Create opens a quick menu of the windows. The README's Controller section has every button.
+  - The controller only works while the game window has the focus.
+  - For a PlayStation controller, turn Steam Input off for Grim Dawn (Steam, Grim Dawn, Properties, Controller); Steam otherwise hides the controller from the game and the mod with it.
+  - Typing a character's name still needs the keyboard.
+- This build is the Grimdark Controller fork: it has its own installer, `GrimdarkControllerInstaller.exe`, installs as "Grimdark Controller" with its own desktop icon, and gets its updates from the fork's releases. It can sit next to the original Grimdark, and both share the same settings.
+
 # 0.6.0 (2026-10-26)
 
 - Telegraph cues are more accurate:

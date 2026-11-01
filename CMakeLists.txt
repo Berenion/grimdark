@@ -59,6 +59,19 @@ else()
   set(GRIMDARK_VERSION "dev")
 endif()
 message(STATUS "grimdark version: ${GRIMDARK_VERSION}")
+# Whose releases the update check asks for, and the name it speaks (CI: GRIMDARK_REPO = the repo it runs in, so a fork
+# checks its own releases; GRIMDARK_APP_NAME = the installed name). The defaults are this repo's.
+if(DEFINED ENV{GRIMDARK_REPO} AND NOT "$ENV{GRIMDARK_REPO}" STREQUAL "")
+  set(GRIMDARK_REPO "$ENV{GRIMDARK_REPO}")
+else()
+  set(GRIMDARK_REPO "ahicks92/grimdark")
+endif()
+if(DEFINED ENV{GRIMDARK_APP_NAME} AND NOT "$ENV{GRIMDARK_APP_NAME}" STREQUAL "")
+  set(GRIMDARK_APP_NAME "$ENV{GRIMDARK_APP_NAME}")
+else()
+  set(GRIMDARK_APP_NAME "Grimdark")
+endif()
+message(STATUS "grimdark repo: ${GRIMDARK_REPO}, app name: ${GRIMDARK_APP_NAME}")
 configure_file(src/grimdark_version.h.in ${CMAKE_BINARY_DIR}/generated/grimdark_version.h @ONLY)
 file(WRITE ${CMAKE_BINARY_DIR}/version.txt "${GRIMDARK_VERSION}
 ")
@@ -72,12 +85,48 @@ add_library(grimdark SHARED
   src/screens/codex.cpp src/screens/factions.cpp src/screens/inventory.cpp src/screens/skills.cpp src/screens/quickbar.cpp
   src/screens/modals.cpp src/screens/vendor.cpp src/db.cpp src/rooms.cpp src/sonar.cpp src/hazard.cpp src/screens/riftgate.cpp
   src/screens/list_picker.cpp src/screens/count_prompt.cpp src/screens/reward_list.cpp src/screens/hotbar_manager.cpp src/screens/map_markers.cpp
-  src/screens/mod_options.cpp src/version_gate.cpp src/update_check.cpp)
+  src/screens/mod_options.cpp src/version_gate.cpp src/update_check.cpp src/gamepad.cpp src/gamepad_input.cpp)
 # C++/WinRT (OneCore speech in src/tts_onecore.cpp): the projection headers are heavy, and windowsapp.lib's
 # api-ms-win-* imports are delay-loaded so a machine without them loses combat speech, not the whole mod.
 set_source_files_properties(src/tts_onecore.cpp PROPERTIES COMPILE_OPTIONS "/bigobj")
+# An SDK older than ~10.0.22000 (Build Tools' default 10.0.20348) ships a C++/WinRT base.h that includes
+# <experimental/coroutine>, which MSVC 14.44 rejects under /std:c++20. On such an SDK the pinned C++/WinRT NuGet
+# package is fetched once and the projection generated from that same SDK's metadata into the build tree (~55 MB);
+# a newer SDK (CI) uses its own headers and nothing is downloaded.
+set(GD_SDK_VER "$ENV{WindowsSDKVersion}")
+string(REGEX REPLACE "[\\/]+$" "" GD_SDK_VER "${GD_SDK_VER}")
+set(GD_SDK_BASE_H "$ENV{WindowsSdkDir}Include/${GD_SDK_VER}/cppwinrt/winrt/base.h")
+set(GD_SDK_CPPWINRT_OK OFF)
+if(EXISTS "${GD_SDK_BASE_H}")
+  file(STRINGS "${GD_SDK_BASE_H}" GD_STD_COROUTINE REGEX "#include <coroutine>")
+  if(GD_STD_COROUTINE)
+    set(GD_SDK_CPPWINRT_OK ON)
+  endif()
+endif()
+if(NOT GD_SDK_CPPWINRT_OK)
+  set(GD_CPPWINRT_VERSION 2.0.240405.15)
+  set(GD_CPPWINRT_DIR ${CMAKE_BINARY_DIR}/cppwinrt)
+  if(NOT EXISTS ${GD_CPPWINRT_DIR}/include/winrt/base.h)
+    message(STATUS "Windows SDK ${GD_SDK_VER} has a pre-C++20 C++/WinRT; generating headers with C++/WinRT ${GD_CPPWINRT_VERSION}")
+    set(GD_CPPWINRT_PKG ${GD_CPPWINRT_DIR}/Microsoft.Windows.CppWinRT.${GD_CPPWINRT_VERSION}.nupkg)
+    file(DOWNLOAD https://www.nuget.org/api/v2/package/Microsoft.Windows.CppWinRT/${GD_CPPWINRT_VERSION} ${GD_CPPWINRT_PKG}
+      EXPECTED_HASH SHA256=e889007b5d9235931e7340ddf737d2c346eebdd23c619f1f4f2426a2aae47180 TLS_VERIFY ON STATUS GD_DL)
+    list(GET GD_DL 0 GD_DL_CODE)
+    if(NOT GD_DL_CODE EQUAL 0)
+      message(FATAL_ERROR "C++/WinRT download failed: ${GD_DL}")
+    endif()
+    file(ARCHIVE_EXTRACT INPUT ${GD_CPPWINRT_PKG} DESTINATION ${GD_CPPWINRT_DIR}/pkg PATTERNS bin/cppwinrt.exe)
+    execute_process(COMMAND ${GD_CPPWINRT_DIR}/pkg/bin/cppwinrt.exe -input ${GD_SDK_VER} -output ${GD_CPPWINRT_DIR}/include
+      RESULT_VARIABLE GD_GEN OUTPUT_QUIET)
+    if(NOT GD_GEN EQUAL 0 OR NOT EXISTS ${GD_CPPWINRT_DIR}/include/winrt/base.h)
+      message(FATAL_ERROR "cppwinrt.exe failed (${GD_GEN}) generating headers for SDK ${GD_SDK_VER}")
+    endif()
+  endif()
+  # /I paths are searched before the SDK's INCLUDE entries, so these headers win for this one file.
+  set_property(SOURCE src/tts_onecore.cpp APPEND PROPERTY INCLUDE_DIRECTORIES ${GD_CPPWINRT_DIR}/include)
+endif()
 target_include_directories(grimdark PRIVATE src ${PRISM_SDK}/include third_party/miniaudio ${CMAKE_BINARY_DIR}/generated)
-target_link_libraries(grimdark PRIVATE gdcore detours sqlite3 ${PRISM_LIB} user32 ws2_32 ole32 delayimp windowsapp winhttp)
+target_link_libraries(grimdark PRIVATE gdcore detours sqlite3 ${PRISM_LIB} user32 ws2_32 ole32 delayimp windowsapp winhttp setupapi hid)
 target_link_options(grimdark PRIVATE /DELAYLOAD:${PRISM_DLL_NAME}
   /DELAYLOAD:api-ms-win-core-winrt-l1-1-0.dll /DELAYLOAD:api-ms-win-core-winrt-error-l1-1-1.dll /DELAYLOAD:api-ms-win-core-winrt-string-l1-1-0.dll)
 target_compile_definitions(grimdark PRIVATE PRISM_DLL_NAME="${PRISM_DLL_NAME}")

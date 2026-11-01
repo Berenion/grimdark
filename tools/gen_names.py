@@ -687,6 +687,10 @@ ENTRIES = [
     ("ProjectileBase_GetDistance", "Game", r"GAME::ProjectileBase::GetDistance\(void\)"),
     ("ProjectileBase_GetLaunchAngle", "Game", r"GAME::ProjectileBase::GetLaunchAngle\(void\)"),
     ("ProjectileAreaEffect_GetStaticClassInfo", "Game", r"GAME::ProjectileAreaEffect::GetStaticClassInfo\(void\)"),
+    # ---- the controller is the mod's alone (src/gamepad.cpp): the game's Steam Input device and its input mode ----
+    ("SteamControllerDevice_Update", "Engine", r"GAME::SteamControllerDevice::Update\(int\)"),
+    ("Steamworks_ControllerIsConnected", "Engine", r"GAME::Steamworks::ControllerIsConnected\(void\)"),
+    ("GameEngine_SetInputMode", "Game", r"GAME::GameEngine::SetInputMode\("),
 
 ]
 tables = {}

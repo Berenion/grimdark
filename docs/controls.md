@@ -176,3 +176,22 @@ The mod's plain keys: `.` `,` N B M V (review groups; Shift = back, Alt = neares
 K H Q X T Z, Shift+W A S D (the free cursor: the press is swallowed before the game, the release passes), and
 Ctrl+1..0, Ctrl+- Ctrl+=, Ctrl+`, Ctrl+T, Ctrl+Shift+P. Still free: F8, F9, Insert/Delete/Home/End/PgUp/PgDn,
 the arrow keys, numpad. Ctrl+letter chords arrive with flags and are unused by the game.
+
+## The controller (2026-10-28, src/gamepad.cpp, layout in src/core/gamepad.h; player table in README "Controller")
+The game never sees a pad: `xinput1_3!XInputGetState` (DirectInput.dll's only pad read, slot 0) answers "not connected",
+`SteamControllerDevice::Update` is a no-op and `Steamworks::ControllerIsConnected` false, and `GameEngine::SetInputMode`
+always stores 0 (keyboard and mouse; Game.dll's skill, evade, pickup and pathing rules and the exe's WASD routine branch on
+it). The mod reads Xbox-style pads through XInput 1.4 and DualShock 4 / DualSense through HID (`src/gamepad_input.cpp`),
+merged into one pad, only while the game has the real focus.
+
+Each button becomes a keyboard key or a registered mod action, decided at press time and kept to the release:
+- Keys are pushed into the synthetic key queue as `player` events, so the mod records them and the game sees only what the
+  current screen's filter passes -- a pad A in a menu is the navigator's Enter, in the world the J mouse hold. Exception:
+  the left stick's W A S D in the world are game-only (unrecorded), so LT's Shift never turns walking into the mod's
+  Shift+W A S D free cursor. LT in the world is a held Shift event (the game's Hold Position) and every key pressed under
+  it carries the Shift flag.
+- Mod commands go through `app::fire_action` by action id (scan.enemyNearest, ingame.where, follow.ping ...); the quick
+  menu (View) and the menu actions list (L3 + A) are list pickers of action ids, run the frame after the picker closes.
+- Context: the world = the focused screen is `in_game` (it owns the keyboard as well, passing the game its keys through the
+  filter, so ownership cannot tell the world from a menu); any window or overlay above it is a menu. A context
+  change lets go of what the sticks hold; buttons keep their press-time meaning until released.

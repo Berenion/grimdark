@@ -72,15 +72,16 @@ std::string fetch(const std::string& path) {
 void run() {
   std::string_view mine = kGrimdarkVersion;
   core::update::Channel ch = core::update::channel_of(mine);
-  std::string body = fetch(core::update::request_path(ch));
+  std::string body = fetch(core::update::request_path(ch, kGrimdarkRepo));
   if (g_cancel || body.empty()) return;
   core::update::Verdict v = core::update::decide(mine, body);
   log::writef("update: installed {}, newer={} latest='{}'", mine, v.newer, v.latest);
   if (!v.newer) return;
   core::MessageBuilder m;
-  m.list_item().fragment(ch == core::update::Channel::Ci ? strings::kCiUpdateAvailable : strings::kUpdateAvailable).fragment(v.latest);
+  if (ch == core::update::Channel::Ci) m.list_item().fragment(strings::kNewer).fragment(kGrimdarkAppName).fragment(strings::kCiBuildAvailable).fragment(v.latest);
+  else m.list_item().fragment(kGrimdarkAppName).fragment(strings::kUpdateAvailable).fragment(v.latest);
   m.list_item().fragment(strings::kYouHave).fragment(mine);
-  m.list_item().fragment(strings::kRunInstallerToUpdate);
+  m.list_item().fragment(strings::kRunThe).fragment(kGrimdarkAppName).fragment(strings::kInstallerToUpdate);
   std::lock_guard<std::mutex> l(g_mu);
   g_pending = m.build();   // spoken by tick() once the game has settled
 }

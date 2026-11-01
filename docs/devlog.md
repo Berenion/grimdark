@@ -1301,3 +1301,35 @@ true)` then the drop or (after our own no/yes picker) the destroy. Verified live
   telegraph's own mode/shape gates) arms its effect for 3 s; a new entity with that record in the sweep is tracked as a
   slow projectile owned by the caster (straight-line accent, 2.5 u zone; no ProjectileBase reads). Ownerless, so the
   cast is the attribution: groundripper_fx01 is also a player relic's beam groundEffect.
+
+## 2026-10-28: building on an old Windows SDK (fork)
+- A Build Tools 2022 install with only SDK 10.0.20348 failed in `src/tts_onecore.cpp`: that SDK's C++/WinRT (2.0.200609)
+  includes `<experimental/coroutine>`, an error under MSVC 14.44 /std:c++20. CMake now checks the SDK's `base.h` for
+  `#include <coroutine>`; when absent it downloads Microsoft.Windows.CppWinRT 2.0.240405.15 (SHA-256 pinned), runs
+  `cppwinrt.exe -input <sdk>` into `build/ninja/cppwinrt/include` and adds that to tts_onecore.cpp only. Built clean,
+  gdcore_tests 150/150, the WinRT imports stay delay-loaded (the newer headers no longer import winrt-string at all).
+  Not run in the game yet.
+
+## 2026-10-28: controller support (fork; src/gamepad.cpp, src/gamepad_input.cpp, src/core/gamepad.*)
+- Static RE (1.3.1.1, disk): the game's pad reads are DirectInput.dll `ProcessJoystickEvents` -> xinput1_3 ordinal 2
+  (slot 0, one call site, 4 s reconnect after a failure, connected flag device+0x334) and Engine.dll
+  `SteamControllerDevice::Update` (only caller `Steamworks::Update`; connected flag device+4, events device+0x10). What a
+  pad changes is `GameEngine` input mode +0x37748 (exported Get/SetInputMode; Game.dll never calls the setter) -- read by
+  `DefaultRequestSkillAction`, `MoveAndPickUpItem` (now 0x162930; the RVAs in docs/re_*.md are 1.3.0.8's), `HotSlotOptionEvade::Activate`,
+  `HotSlotOptionSkill::Activate`, `Player::FindPath`, `CompareItems` and the UI text generators. Hooked: the xinput call
+  answers not connected, the Steam device never updates, `ControllerIsConnected` is false, `SetInputMode` stores 0 (a
+  nonzero request is logged, five times at most).
+- The mod reads pads itself: XInput 1.4 (empty slots probed every 2 s) + DualShock 4 / DualSense over HID (overlapped
+  reads on a thread per pad, report offsets as in d4-assist / hid-playstation, a 3 s scan), OR-merged so a pad mirrored by
+  Steam / DS4Windows cannot press twice. Layout logic is engine-free and unit-tested (tests/gamepad_tests.cpp, 18 cases).
+- Built clean, gdcore_tests 168/168. Not run in the game yet.
+
+## 2026-11-01 -- fork identity: Grimdark Controller (Berenion/grimdark)
+- Upstream declined the controller work, so this repo is a fork that merges upstream/main as it moves. The build's identity
+  is compile-time env with upstream's values as defaults: GRIMDARK_REPO (update check + installer release list),
+  GRIMDARK_APP_NAME (install folder, shortcuts, Add/Remove key, spoken update line), GRIMDARK_INSTALLER_EXE. CI sets them
+  in build.yml's top-level env (repo = github.repository); the repo-root .cargo/config.toml sets them for local cargo builds (root, not installer/: cargo searches it from the CWD).
+  %LOCALAPPDATA%\Grimdark (log + settings) stays shared with upstream: settings.cpp rewrites every key it loaded, so
+  neither build drops the other's keys.
+- Fork tags are v<upstream>-pad.N; core/update_check now compares semver pre-release identifiers (it used to ignore the
+  suffix, so pad.1 vs pad.2 compared equal). Never push upstream's tags here: a v* tag push publishes a release.

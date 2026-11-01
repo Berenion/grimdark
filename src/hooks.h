@@ -27,6 +27,7 @@ bool run_on_game_thread(std::function<void()> fn, unsigned timeout_ms = 5000);
 // the conversation's Escape): served to the game unfiltered, never recorded as the player's.
 struct SynthKey { int code; bool released; bool shift, ctrl, alt; char16_t ch; bool player = false; };
 void push_key_event(const SynthKey& k);                  // one event, its own frame
+bool game_has_focus();                                   // the game's window is really the foreground one (the dev loop's faked focus is the game's alone)
 void push_key(int code, bool shift, bool ctrl, bool alt, char16_t ch, bool player = false);  // press frame + release frame
 void set_game_keys_muted(bool m);                        // the game sees no physical key events ...
 bool game_keys_muted();

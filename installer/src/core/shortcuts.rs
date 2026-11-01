@@ -2,7 +2,7 @@
 //! per-user Add/Remove Programs entry (HKCU\...\Uninstall\Grimdark, which runs our copy with --uninstall).
 use std::path::Path;
 
-use super::paths::{desktop_shortcut, start_menu_shortcut, APP_NAME, INSTALLER_EXE, LAUNCHER_EXE, UNINSTALL_KEY};
+use super::paths::{desktop_shortcut, github_page_url, start_menu_shortcut, APP_NAME, INSTALLER_EXE, LAUNCHER_EXE, UNINSTALL_KEY};
 
 #[cfg(windows)]
 fn write_lnk(lnk: &Path, target: &Path, workdir: &Path, description: &str) -> Result<(), String> {
@@ -57,7 +57,7 @@ fn register_uninstall(install_dir: &Path, version: &str) -> Result<(), String> {
     set("InstallLocation", &install_dir.to_string_lossy())?;
     set("DisplayIcon", &launcher.to_string_lossy())?;
     set("UninstallString", &format!("\"{}\" --uninstall", installer.to_string_lossy()))?;
-    set("URLInfoAbout", "https://github.com/ahicks92/grimdark")?;
+    set("URLInfoAbout", &github_page_url())?;
     key.set_value("NoModify", &1u32).map_err(|e| e.to_string())?;
     key.set_value("NoRepair", &1u32).map_err(|e| e.to_string())?;
     Ok(())
@@ -65,7 +65,7 @@ fn register_uninstall(install_dir: &Path, version: &str) -> Result<(), String> {
 
 pub fn create_all(install_dir: &Path) -> Result<(), String> {
     let target = install_dir.join(LAUNCHER_EXE);
-    let desc = "Start Grim Dawn with the Grimdark screen-reader mod";
+    let desc = &format!("Start Grim Dawn with the {} screen-reader mod", APP_NAME);
     if let Some(lnk) = desktop_shortcut() {
         write_lnk(&lnk, &target, install_dir, desc)?;
     }
