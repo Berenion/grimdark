@@ -73,6 +73,10 @@ else()
 endif()
 message(STATUS "grimdark repo: ${GRIMDARK_REPO}, app name: ${GRIMDARK_APP_NAME}")
 configure_file(src/grimdark_version.h.in ${CMAKE_BINARY_DIR}/generated/grimdark_version.h @ONLY)
+# The controller controls list (data/controller_controls.txt), embedded in the DLL; editing it reconfigures.
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/data/controller_controls.txt)
+file(READ ${CMAKE_SOURCE_DIR}/data/controller_controls.txt GRIMDARK_PAD_CONTROLS)
+configure_file(src/pad_controls_text.h.in ${CMAKE_BINARY_DIR}/generated/pad_controls_text.h @ONLY)
 file(WRITE ${CMAKE_BINARY_DIR}/version.txt "${GRIMDARK_VERSION}
 ")
 
@@ -85,7 +89,7 @@ add_library(grimdark SHARED
   src/screens/codex.cpp src/screens/factions.cpp src/screens/inventory.cpp src/screens/skills.cpp src/screens/quickbar.cpp
   src/screens/modals.cpp src/screens/vendor.cpp src/db.cpp src/rooms.cpp src/sonar.cpp src/hazard.cpp src/screens/riftgate.cpp
   src/screens/list_picker.cpp src/screens/count_prompt.cpp src/screens/reward_list.cpp src/screens/hotbar_manager.cpp src/screens/map_markers.cpp
-  src/screens/mod_options.cpp src/version_gate.cpp src/update_check.cpp src/gamepad.cpp src/gamepad_input.cpp)
+  src/screens/mod_options.cpp src/version_gate.cpp src/update_check.cpp src/gamepad.cpp src/gamepad_input.cpp src/screens/pad_controls.cpp)
 # C++/WinRT (OneCore speech in src/tts_onecore.cpp): the projection headers are heavy, and windowsapp.lib's
 # api-ms-win-* imports are delay-loaded so a machine without them loses combat speech, not the whole mod.
 set_source_files_properties(src/tts_onecore.cpp PROPERTIES COMPILE_OPTIONS "/bigobj")

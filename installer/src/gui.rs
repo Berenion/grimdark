@@ -1,5 +1,5 @@
 //! The window: a status line, a game line, a log box that narrates every step, and the buttons
-//! (Install / Update with a version picker, Install from file, Uninstall). Native wx controls, so a
+//! (Install / Update with a version picker, Install from file, Uninstall, Controller controls). Native wx controls, so a
 //! screen reader reads it as an ordinary dialog. Downloads run on a worker thread; a timer drains its
 //! progress messages into the log so the window never goes "not responding".
 use std::cell::RefCell;
@@ -12,6 +12,9 @@ use wxdragon::prelude::*;
 use crate::core::install::Progress;
 use crate::core::paths::{data_dir, install_dir, APP_NAME};
 use crate::core::{detect, github, install, uninstall};
+
+/// The controller controls list: the same file the mod embeds and shows from its quick menu.
+const CONTROLLER_CONTROLS: &str = include_str!("../../data/controller_controls.txt");
 
 /// What the worker thread sends back.
 enum Msg {
@@ -118,8 +121,9 @@ pub fn run() {
         let install_btn = Button::builder(&panel).with_label("Install").build();
         let file_btn = Button::builder(&panel).with_label("Install from file...").build();
         let uninstall_btn = Button::builder(&panel).with_label("Uninstall").build();
+        let controls_btn = Button::builder(&panel).with_label("Controller controls").build();
         let close_btn = Button::builder(&panel).with_label("Close").build();
-        for b in [&install_btn, &file_btn, &uninstall_btn, &close_btn] {
+        for b in [&install_btn, &file_btn, &uninstall_btn, &controls_btn, &close_btn] {
             buttons.add(b, 0, SizerFlag::All, 4);
         }
         sizer.add(&status, 0, SizerFlag::Expand | SizerFlag::All, 8);
@@ -307,6 +311,12 @@ pub fn run() {
             });
         }
 
+        // Controller controls: the list in a read-only text box (a screen reader reads it line by line), Escape or Close.
+        {
+            let frame = frame.clone();
+            controls_btn.on_click(move |_| show_controller_controls(&frame));
+        }
+
         {
             let frame = frame.clone();
             close_btn.on_click(move |_| {
@@ -317,4 +327,25 @@ pub fn run() {
         frame.show(true);
     })
     .expect("Failed to start the installer window");
+}
+
+fn show_controller_controls(parent: &Frame) {
+    let dialog = Dialog::builder(parent, "Controller controls")
+        .with_style(DialogStyle::DefaultDialogStyle | DialogStyle::ResizeBorder)
+        .with_size(760, 600)
+        .build();
+    let sizer = BoxSizer::builder(Orientation::Vertical).build();
+    let text = TextCtrl::builder(&dialog)
+        .with_style(TextCtrlStyle::MultiLine | TextCtrlStyle::ReadOnly | TextCtrlStyle::WordWrap)
+        .build();
+    text.set_value(&CONTROLLER_CONTROLS.replace("\r\n", "\n"));
+    text.set_insertion_point(0);
+    let close = Button::builder(&dialog).with_id(ID_CANCEL).with_label("Close").build();
+    sizer.add(&text, 1, SizerFlag::Expand | SizerFlag::All, 8);
+    sizer.add(&close, 0, SizerFlag::AlignRight | SizerFlag::All, 8);
+    dialog.set_sizer(sizer, true);
+    dialog.set_escape_id(ID_CANCEL);
+    text.set_focus();
+    dialog.show_modal();
+    dialog.destroy();
 }

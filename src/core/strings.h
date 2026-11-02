@@ -531,6 +531,7 @@ inline constexpr std::string_view kPadQuickMenu = "quick menu";
 inline constexpr std::string_view kPadActions = "actions";
 inline constexpr std::string_view kPadFreeCursor = "cursor";     // L3 + R3: the right stick moves the cursor
 inline constexpr std::string_view kPadScanner = "scanner";       // ... and back to the scanner
+inline constexpr std::string_view kPadControls = "controller controls";   // the quick menu's list of every button
 // the right-stick scanner's categories, in flick order (each a review group of the keyboard's finding keys)
 inline constexpr std::string_view kScanEnemies = "enemies";
 inline constexpr std::string_view kScanStrongest = "strongest enemies";

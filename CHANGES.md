@@ -1,3 +1,7 @@
+# Unreleased
+
+- New: the controller quick menu (View or Create) has "Controller controls", the list of every button, by section. The installer has a "Controller controls" button that shows the same list.
+
 # 0.6.0-pad.1 (2026-11-01)
 
 - New: controller support. An Xbox controller, a DualShock 4 or a DualSense, wired or Bluetooth, works alongside the keyboard; the game itself never sees the controller, so nothing changes in how it plays. The left stick walks, B or Circle evades, A and X attack and cast at what you are reviewing, Y jumps to the nearest enemy, flicking the right stick runs a scanner through enemies, loot, exits, people and more, and View or Create opens a quick menu of the windows. The README's Controller section has every button.

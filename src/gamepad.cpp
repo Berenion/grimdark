@@ -119,7 +119,7 @@ static void quick_menu() {
   open_action_menu(strings::kPadQuickMenu,
                    {"game.character", "game.skills", "game.map", "game.codex", "game.factions", "game.riftgate", "game.lootFilter",
                     "ingame.pets", "ingame.hotbarManager", "ingame.announcements", "ingame.cueSettings", "cursor.mode", "game.pause",
-                    "mod.menu"});
+                    "pad.controls", "mod.menu"});
 }
 
 static void actions_menu() {

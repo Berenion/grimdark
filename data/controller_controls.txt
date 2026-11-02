@@ -1,0 +1,94 @@
+Grimdark controller controls
+
+BEFORE YOU START
+
+Buttons are written Xbox / PlayStation. The keyboard key each command stands for is in brackets.
+The controller only works while the game window has the focus.
+For a PlayStation controller, Steam Input must be off for Grim Dawn.
+
+COMBAT AND THE WORLD
+
+Left stick: move, eight directions (W A S D)
+B / Circle: evade (Space). B evades in every layer, even while holding RT or L3
+A / Cross: left mouse button at the reviewed thing; hold to keep attacking (J)
+X / Square: right mouse button at the reviewed thing (I)
+Y / Triangle: jump to the nearest enemy (Alt+.)
+LB / L1: health potion (R)
+RB / R1: energy potion (E)
+LT / L2, hold: Hold Position, attack or cast without moving (Shift)
+RT / R2, hold: quickbar layer (see below)
+Right stick flick: the scanner (see below)
+R3: ping the reviewed thing (;)
+L3 tap: where am I (K)
+L3 hold: mod layer (see below)
+D-pad up: health and energy (H)
+D-pad down: use the nearest usable thing (U)
+D-pad left: pick up the nearest item (G)
+D-pad right: walk to the last selection (L)
+Start / Options tap: game menu (Escape)
+Start / Options hold half a second: pause or unpause (Ctrl+P)
+View / Create, or the touchpad click: quick menu
+
+THE SCANNER (RIGHT STICK)
+
+Flick up or down: previous or next category. Says the category and lands on its nearest entry.
+Flick left or right: previous or next entry in the category, nearest first.
+Categories in order: enemies, strongest enemies, people and objects, loot, exits, bystanders and breakables, pets, characters.
+A landing moves the review cursor, so A and X then act on it.
+
+QUICKBAR LAYER (HOLD RT / R2)
+
+A / Cross: slot 1
+X / Square: slot 2
+Y / Triangle: slot 3
+LB / L1: slot 4
+RB / R1: slot 5
+D-pad up: slot 6
+D-pad right: slot 7
+D-pad down: slot 8
+D-pad left: slot 9
+R3: slot 10
+Hold LT as well to cast without moving.
+
+MOD LAYER (HOLD L3; THE D-PAD HAS NO L3 COMMANDS)
+
+A / Cross: follow the picked map marker (')
+X / Square: follow the reviewed thing (Ctrl+')
+Y / Triangle: inspect the target (/)
+LB / L1: swap weapon set (F)
+RB / R1: switch quickbar (Y)
+LT / L2: sonar on or off (\)
+RT / R2: show all items on or off (O)
+Right stick flick up: objectives (Q)
+Right stick flick down: describe the room (X)
+Right stick flick left: nearest unexplored area (P)
+R3: toggle the right stick between moving the cursor ("cursor") and scanning ("scanner")
+Start / Options: Grimdark menu (F1)
+View / Create: quick menu
+
+QUICK MENU (VIEW / CREATE)
+
+A list of: inventory and character, skills, map, codex, factions, riftgate, loot filter, pets, hotbar manager, combat announcements, sonar settings, cursor mode (grid or polar), pause, controller controls (this list), the Grimdark menu.
+Move with the d-pad or left stick, A to open one, B to close.
+
+MENUS AND WINDOWS
+
+D-pad or left stick: up / down / left / right (held repeats)
+A / Cross: activate (Enter)
+B / Circle: back (Escape)
+Start / Options: back (Escape)
+X / Square: secondary action (Backspace)
+Y / Triangle: tooltip (Space)
+L3 + Y: detailed tooltip (Ctrl+Space)
+Right stick up / down: detailed tooltip a line at a time (Shift+Up / Shift+Down)
+R3: compare with what you have equipped (\)
+LB / L1: previous panel (Shift+Tab)
+RB / R1: next panel (Tab)
+LT / L2: previous tab (Ctrl+Shift+Tab)
+RT / R2: next tab (Ctrl+Tab)
+L3 + LB: previous group (Ctrl+Up)
+L3 + RB: next group (Ctrl+Down)
+L3 + LT: first item (Home)
+L3 + RT: last item (End)
+L3 + A: actions for the focused thing: assign to the left or right mouse button or a quickbar slot (1 to 10), sell part of a stack or set the receiving bag, drop
+Typing (character names, type-to-search) still needs the keyboard.

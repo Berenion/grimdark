@@ -370,7 +370,7 @@ In the world:
 | L3 hold | Mod layer, below |
 | D-pad up / down / left / right | Health and energy (H) / use the nearest usable thing (U) / pick up the nearest item (G) / walk to the last selection (L) |
 | Start / Options | Tap: game menu (Escape). Hold half a second: pause or unpause (Ctrl+P) |
-| View / Create, or the touchpad click | Quick menu: a list of the windows and settings (inventory, skills, map, codex, factions, riftgate, loot filter, pets, hotbar manager, combat announcements, sonar settings, cursor mode, pause, the Grimdark menu); Enter (A) opens one |
+| View / Create, or the touchpad click | Quick menu: a list of the windows and settings (inventory, skills, map, codex, factions, riftgate, loot filter, pets, hotbar manager, combat announcements, sonar settings, cursor mode, pause, controller controls (this list of every button), the Grimdark menu); Enter (A) opens one |
 
 The scanner: flick the right stick up or down to change category, which says the category and lands on its nearest
 entry ("loot, Rare Belt, 6 away, 2 o'clock"); flick left or right for the previous or next entry, nearest first. The

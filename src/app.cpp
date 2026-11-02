@@ -41,6 +41,7 @@
 #include "screens/announcements.h"
 #include "screens/cue_settings.h"
 #include "screens/mod_menu.h"
+#include "screens/pad_controls.h"
 #include "screens/mod_options.h"
 #include "screens/sound_glossary.h"
 #include "screens/pets.h"
@@ -116,6 +117,8 @@ static void register_actions() {
   }
   // F1 = the mod's own menu, live everywhere (Global); tooltips stay on Space (2026-09-01, F1 used to double as tooltip).
   m.register_action("mod.menu", "Grimdark menu", InputCategory::Global, [] { screens::open_mod_menu(); }).bind(keys::F1);
+  // No key: the controller's quick menu opens it (data/controller_controls.txt).
+  m.register_action("pad.controls", "Controller controls", InputCategory::Global, [] { screens::open_pad_controls(); });
   // Ctrl+Tab / Ctrl+Shift+Tab: the current screen's tabs (tab list across the top; the page is one column).
   m.register_action("ui.tabNext", "Next tab", InputCategory::UI, [] { Screen* s = g_screens.current(); if (s) s->switch_tab(1); }).bind(keys::Tab, true, false, false);
   m.register_action("ui.tabPrev", "Previous tab", InputCategory::UI, [] { Screen* s = g_screens.current(); if (s) s->switch_tab(-1); }).bind(keys::Tab, true, true, false);
@@ -336,6 +339,7 @@ void init() {
   g_screens.register_screen(screens::make_cue_settings_overlay());
   g_screens.register_screen(screens::make_mod_menu());
   g_screens.register_screen(screens::make_sound_glossary());
+  g_screens.register_screen(screens::make_pad_controls());
   g_screens.register_screen(screens::make_mod_options());
   g_screens.register_screen(screens::make_list_picker());
   g_screens.register_screen(screens::make_count_prompt());
