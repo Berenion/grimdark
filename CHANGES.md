@@ -1,4 +1,4 @@
-# Unreleased
+# 0.6.0-pad.2 (2026-11-02)
 
 - New: the controller quick menu (View or Create) has "Controller controls", the list of every button, by section. The installer has a "Controller controls" button that shows the same list.
 
