@@ -59,6 +59,12 @@ for updates itself.
 You now have a desktop icon `Grimdark Controller`.  You launch the game through this icon instead of the game's own.  Steam must be
 running.
 
+If you would rather start the game from Steam's own Play button, set Grim Dawn's launch options (Steam, Grim Dawn,
+Properties, General, Launch Options) to the launcher followed by `%command%`, with the quotes:
+`"C:\Users\myusername\AppData\Local\Programs\Grimdark Controller\gdlaunch.exe" %command%` (or wherever your mod folder
+is). Steam then starts the mod's launcher, which starts the 64-bit game with the mod, whichever Play option you pick. The
+desktop icon keeps working as before. Clear the launch options to play without the mod.
+
 The launcher also sets the two game options the mod cannot play without, every time it starts the game: Movement Type is
 forced to Keyboard (the game's own WASD walking), Evade to Cursor is forced off (otherwise Space dashes at the mouse
 cursor and ignores WASD), and the keyboard-mode key map is written as the game's default one with the four walking keys

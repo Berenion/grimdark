@@ -1,3 +1,8 @@
+# Unreleased
+
+- New: the game can be started from Steam's Play button with the mod. Put the launcher and `%command%` in Grim Dawn's Steam launch options; the README's Setup section has the exact line. The desktop icon works as before.
+- Fix: a DualSense or DualShock 4 that Windows was still setting up when the mod first looked for it (for example one just switched on over Bluetooth) is now found a few seconds later, instead of being ignored until the game restarts.
+
 # 0.6.0-pad.3 (2026-11-19)
 
 - Works with Grim Dawn 1.3.1.2, the Steam patch of November 16. The previous version, 1.3.1.1, is no longer supported.

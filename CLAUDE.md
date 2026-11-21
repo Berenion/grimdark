@@ -315,6 +315,8 @@ developer's screen reader. Client: `uv run tools/gd.py <cmd>` (add `--with pillo
   fxPakName) into `src/wave_effects.h`, for the projectile cue; rerun after a game patch.
 - `tools/gen_telegraph_records.py` -- per-skill-record telegraph shapes by arc (frontal / narrow-ring fans) from database.arz
   into `src/telegraph_records.h`; rerun after a game patch, like `gen_names.py`.
+- `tools/padprobe.py [seconds]` -- the Sony pads (USB / Bluetooth HID) and XInput slots as the mod's reader sees them,
+  with the first report of each id; no game needed.
 - `tools/arz.py <record-path-regex> [field-regex]` — reads `database.arz` offline (records + their fields).
 - `tools/telegraph_audit.py <monster-record-regex>` — a monster's skills per phase (follows `poolToSpawnOnDeath`), each with
   its class and the telegraph verdict (shape / silent / UNKNOWN) from `src/telegraph.cpp`'s table. Offline.
