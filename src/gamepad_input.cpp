@@ -89,6 +89,12 @@ struct Device {
   std::atomic<bool> done{false};
   pad::State state;   // under g_mu
 };
+static std::string hex_bytes(const uint8_t* p, size_t n) {
+  static const char* d = "0123456789abcdef";
+  std::string s;
+  for (size_t i = 0; i < n; ++i) { if (i) s += ' '; s += d[p[i] >> 4]; s += d[p[i] & 15]; }
+  return s;
+}
 static std::mutex g_mu;
 static std::vector<std::unique_ptr<Device>> g_devices;
 static std::set<std::wstring> g_ignored;          // not a pad we read (checked once per path)
@@ -112,6 +118,7 @@ static DWORD WINAPI read_loop(LPVOID arg) {
   OVERLAPPED ov{};
   ov.hEvent = CreateEventW(nullptr, TRUE, FALSE, nullptr);
   bool stopping = false;
+  std::set<int> seen_ids;   // each report id is logged once (what the pad sends, and whether it was understood)
   for (;;) {
     ResetEvent(ov.hEvent);
     DWORD got = 0;
@@ -128,7 +135,11 @@ static DWORD WINAPI read_loop(LPVOID arg) {
       if (!GetOverlappedResult(d->handle, &ov, &got, FALSE)) break;
     }
     pad::State s;
-    if (pad::parse_sony_report(buf.data(), got, d->model, d->bluetooth, s)) {
+    bool ok = pad::parse_sony_report(buf.data(), got, d->model, d->bluetooth, s);
+    if (got > 0 && seen_ids.insert(buf[0]).second)
+      log::writef("pad: {} report {:#04x}, {} bytes, {}: {}", model_name(d->model), buf[0], got, ok ? "read" : "not understood",
+                  hex_bytes(buf.data(), std::min<size_t>(got, 16)));
+    if (ok) {
       std::lock_guard lk(g_mu);
       d->state = s;
     }
@@ -136,7 +147,7 @@ static DWORD WINAPI read_loop(LPVOID arg) {
   CloseHandle(ov.hEvent);
   CloseHandle(d->handle);
   d->handle = INVALID_HANDLE_VALUE;
-  if (!stopping) log::writef("pad: {} disconnected", model_name(d->model));
+  if (!stopping) log::writef("pad: {} disconnected (error {})", model_name(d->model), GetLastError());
   d->done = true;
   return 0;
 }
@@ -148,18 +159,29 @@ static bool known(const std::wstring& path) {
 }
 
 static void try_open(const std::wstring& path) {
-  bool sony_path = path.find(L"vid_054c") != std::wstring::npos;
+  // USB paths say "vid_054c", Bluetooth ones "vid&0002054c": a Sony device either way.
+  bool sony_path = path.find(L"054c") != std::wstring::npos;
   HANDLE q = CreateFileW(path.c_str(), 0, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
   if (q == INVALID_HANDLE_VALUE) {
-    if (sony_path) log::writef("pad: cannot query {} (error {})", narrow(path), GetLastError());
-    g_ignored.insert(path);
+    // A Sony pad that is still coming up (just switched on over Bluetooth) is retried on the next scan.
+    if (sony_path) {
+      if (g_open_failed.insert(path).second) log::writef("pad: cannot query {} (error {})", narrow(path), GetLastError());
+    } else {
+      g_ignored.insert(path);
+    }
     return;
   }
   HIDD_ATTRIBUTES a{};
   a.Size = sizeof a;
   pad::SonyModel model{};
   size_t len = 0;
-  if (HidD_GetAttributes(q, &a) && pad::sony_model(a.VendorID, a.ProductID, model)) {
+  bool attrs = HidD_GetAttributes(q, &a);
+  if (!attrs && sony_path) {   // transient: retried on the next scan
+    if (g_open_failed.insert(path).second) log::writef("pad: no attributes for {} (error {})", narrow(path), GetLastError());
+    CloseHandle(q);
+    return;
+  }
+  if (attrs && pad::sony_model(a.VendorID, a.ProductID, model)) {
     PHIDP_PREPARSED_DATA pp = nullptr;
     if (HidD_GetPreparsedData(q, &pp)) {
       HIDP_CAPS caps{};
@@ -167,8 +189,10 @@ static void try_open(const std::wstring& path) {
       if (st == HIDP_STATUS_SUCCESS && caps.UsagePage == 0x01 && caps.Usage == 0x05) len = caps.InputReportByteLength;
       else log::writef("pad: Sony collection skipped: status {:#x} usage page {:#x} usage {:#x}", (unsigned)st, caps.UsagePage, caps.Usage);
       HidD_FreePreparsedData(pp);
-    } else {
-      log::writef("pad: no preparsed data for {} (error {})", narrow(path), GetLastError());
+    } else {   // transient: retried on the next scan
+      if (g_open_failed.insert(path).second) log::writef("pad: no preparsed data for {} (error {})", narrow(path), GetLastError());
+      CloseHandle(q);
+      return;
     }
   } else if (sony_path) {
     log::writef("pad: Sony path not recognised: vid {:#06x} pid {:#06x}", a.VendorID, a.ProductID);
@@ -227,7 +251,12 @@ static void scan_once() {
     if (g_ignored.count(path) || known(path)) continue;
     try_open(path);
   }
-  if (first) { first = false; log::writef("pad: first HID scan saw {} interfaces", i); }
+  if (first) {
+    first = false;
+    int sony = 0;
+    for (auto& p : g_ignored) if (p.find(L"054c") != std::wstring::npos) ++sony;
+    log::writef("pad: first HID scan saw {} interfaces, {} pads open, {} other Sony collections", i, g_devices.size(), sony);
+  }
   SetupDiDestroyDeviceInfoList(set);
 }
 

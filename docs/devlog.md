@@ -1353,3 +1353,12 @@ true)` then the drop or (after our own no/yes picker) the destroy. Verified live
   Monster Object "DIFF"s start past the class's real slot count (tables run together), Entity's two small tables only
   swapped export order.
 - Live (user, driven by controller): character list, inventory, skills, constellations, factions and riftgate work.
+
+## 2026-11-21: the DualSense over Bluetooth (fork)
+- A tester's DualSense (Bluetooth) never showed up in one session's log (no open, no error). The HID scan put any path
+  whose query open / attributes / preparsed data failed on the permanent ignore list, and only logged paths containing
+  `vid_054c`, which a Bluetooth path never does (`_vid&0002054c_pid&0ce6`). Now a Sony path is retried every scan, logged
+  once, and the first report of each id is logged with its bytes and whether it parsed. In the next session the pad
+  opened on the first scan (report 0x31, 78 bytes, parsed) and worked, so the failure was not reproduced: it was either
+  the pad being off or the transient open the retry now covers. `tools/padprobe.py` reads the pads the same way,
+  without the game.
