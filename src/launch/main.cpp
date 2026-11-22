@@ -4,6 +4,11 @@
 // (a screen reader reads those natively; the mod's speech is not up yet) plus a console line.
 //
 //   gdlaunch.exe [--game "<path>\x64\Grim Dawn.exe"] [--dry-run]
+//   gdlaunch.exe <the game's exe> [game arguments]   (Steam launch options: "<mod folder>\gdlaunch.exe" %command%)
+//
+// Under Steam's %command% the first plain argument is the exe Steam would have started; the 64-bit exe of that
+// install is used whichever one Steam picked, and the arguments after it go on to the game. Steam has then set the
+// real launch environment itself, so only what is missing is faked. Run on its own, nothing changes.
 //
 // Game location, in order: --game; game_path.txt next to this exe (one line); Steam's own records (registry
 // SteamPath -> steamapps\libraryfolders.vdf -> the library holding appmanifest_219990.acf -> its installdir);
@@ -108,7 +113,7 @@ std::wstring find_game_via_steam() {
 }
 
 std::wstring find_game(const std::wstring& arg) {
-  if (!arg.empty()) { printf("Game path from --game.\n"); return arg; }
+  if (!arg.empty()) { printf("Game path from the command line.\n"); return arg; }
   std::wstring txt = exe_dir() + L"\\game_path.txt";
   if (file_exists(txt)) {
     std::string line = read_file(txt);
@@ -123,6 +128,42 @@ std::wstring find_game(const std::wstring& arg) {
   return {};
 }
 
+bool has_env(const wchar_t* name) {
+  wchar_t probe[2];
+  return GetEnvironmentVariableW(name, probe, 2) > 0 || GetLastError() != ERROR_ENVVAR_NOT_FOUND;
+}
+
+// One argument quoted for a Windows command line (CommandLineToArgvW rules).
+std::wstring quote_arg(const std::wstring& a) {
+  if (!a.empty() && a.find_first_of(L" \t\"") == std::wstring::npos) return a;
+  std::wstring out = L"\"";
+  size_t slashes = 0;
+  for (wchar_t c : a) {
+    if (c == L'\\') { ++slashes; continue; }
+    out.append(c == L'"' ? slashes * 2 + 1 : slashes, L'\\');
+    slashes = 0;
+    out += c;
+  }
+  out.append(slashes * 2, L'\\');
+  return out + L"\"";
+}
+
+// Whichever Play option Steam picked (x64\Grim Dawn.exe, the 32-bit exe at the install root, compat\Grim Dawn.exe),
+// the mod needs the 64-bit exe of that install: the first folder up from the given exe that holds x64\Grim Dawn.exe.
+// Empty when none does (find_game then asks Steam's records as usual).
+std::wstring x64_exe_near(const std::wstring& exe) {
+  std::wstring dir = exe.substr(0, exe.find_last_of(L"\\/"));
+  for (int up = 0; up < 4 && !dir.empty(); ++up) {
+    std::wstring cand = dir + L"\\x64\\Grim Dawn.exe";
+    if (file_exists(cand)) return cand;
+    size_t slash = dir.find_last_of(L"\\/");
+    if (slash == std::wstring::npos) break;
+    dir.resize(slash);
+  }
+  printf("No x64\\Grim Dawn.exe near %ls; looking for the game the usual way.\n", exe.c_str());
+  return {};
+}
+
 // What the Steam client puts in a game's environment (GDCommunityLauncher's list): the SteamStub wrapper and
 // steam_api then treat the process as Steam-launched instead of relaunching it through Steam.
 void fake_steam_environment() {
@@ -132,7 +173,9 @@ void fake_steam_environment() {
     {L"SteamAppUser", L"username"}, {L"SteamUser", L"username"}, {L"STEAMID", L"00000000000000000"},
     {L"SESSIONNAME", L"Console"},
   };
-  for (auto& v : vars) SetEnvironmentVariableW(v[0], v[1]);
+  for (auto& v : vars)   // a launch through Steam (%command%) already carries the real values: keep them
+    if (!has_env(v[0])) SetEnvironmentVariableW(v[0], v[1]);
+  if (has_env(L"USER_MYDOCS")) return;
   PWSTR docs = nullptr;
   if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_Documents, 0, nullptr, &docs))) { SetEnvironmentVariableW(L"USER_MYDOCS", docs); CoTaskMemFree(docs); }
 }
@@ -220,14 +263,24 @@ struct LogTail {
 
 int wmain(int argc, wchar_t** argv) {
   SetConsoleTitleW(L"Grimdark");
-  std::wstring game_arg;
-  bool dry = false;
+  std::wstring game_arg, game_args;
+  bool dry = false, from_steam = false;
   for (int i = 1; i < argc; ++i) {
     if (!_wcsicmp(argv[i], L"--game") && i + 1 < argc) game_arg = argv[++i];
     else if (!_wcsicmp(argv[i], L"--dry-run")) dry = true;
-    else { printf("usage: gdlaunch [--game <path to x64\\Grim Dawn.exe>] [--dry-run]\n"); return 2; }
+    else if (argv[i][0] != L'-' && file_exists(argv[i])) {   // Steam's %command%: the exe, then the game's own arguments
+      game_arg = x64_exe_near(argv[i]);
+      from_steam = true;
+      for (int j = i + 1; j < argc; ++j) game_args += L" " + quote_arg(argv[j]);
+      break;
+    } else {
+      printf("usage: gdlaunch [--game <path to x64\\Grim Dawn.exe>] [--dry-run]\n"
+             "   or, in Steam's launch options: \"<mod folder>\\gdlaunch.exe\" %%command%%\n");
+      return 2;
+    }
   }
   printf("Grimdark launcher\n\n");
+  if (from_steam) printf("Started by Steam (launch options with %%command%%).\n");
 
   std::wstring dir = exe_dir();
   std::wstring dll = dir + L"\\grimdark.dll";
@@ -257,7 +310,7 @@ int wmain(int argc, wchar_t** argv) {
     if (h != INVALID_HANDLE_VALUE) CloseHandle(h);
   }
   std::wstring cwd = install_root_of(exe);
-  std::wstring cmd = L"\"" + exe + L"\"";
+  std::wstring cmd = L"\"" + exe + L"\"" + game_args;
   STARTUPINFOW si{};
   si.cb = sizeof si;
   {   // dev: GRIMDARK_NOFOCUS=1 (the DLL then blocks the game's own focus grabs) also keeps the initial window from activating
